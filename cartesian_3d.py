@@ -6,8 +6,8 @@ from matplotlib.ticker import MultipleLocator
 
 
 TEACHING_VIEW = {
-    "elev": 12,
-    "azim": 25,
+    "elev": 20,
+    "azim": -50,
     "proj_type": "persp",
     "focal_length": 0.65,
     "grid_alpha": 0.35,
@@ -38,14 +38,18 @@ def create_cartesian_figure(limit=10):
     else:
         ax.set_proj_type("ortho")
 
-    ax.quiver(0, 0, 0, limit, 0, 0, color="r", linewidth=2, arrow_length_ratio=0.08)
-    ax.quiver(0, 0, 0, 0, limit, 0, color="g", linewidth=2, arrow_length_ratio=0.08)
-    ax.quiver(0, 0, 0, 0, 0, limit, color="b", linewidth=2, arrow_length_ratio=0.08)
-    ax.scatter(0, 0, 0, color="k", s=60, marker="o")
-
-    ax.text(limit, 0, 0, "X", color="r")
-    ax.text(0, limit, 0, "Y", color="g")
-    ax.text(0, 0, limit, "Z", color="b")
+    # Background right-handed Cartesian axes (negative and positive directions).
+    ax.plot([-limit, limit], [0, 0], [0, 0], color="0.35", linestyle="--", linewidth=1.4)
+    ax.plot([0, 0], [-limit, limit], [0, 0], color="0.35", linestyle="--", linewidth=1.4)
+    ax.plot([0, 0], [0, 0], [-limit, limit], color="0.35", linestyle="--", linewidth=1.4)
+    # Direction labels on the background axes.
+    label_offset = limit * 1.05
+    ax.text(label_offset, 0, 0, "Right", color="0.35")
+    ax.text(-label_offset, 0, 0, "Left", color="0.35")
+    ax.text(0, label_offset, 0, "Front", color="0.35")
+    ax.text(0, -label_offset, 0, "Back", color="0.35")
+    ax.text(0, 0, label_offset, "Up", color="0.35")
+    ax.text(0, 0, -label_offset, "Down", color="0.35")
 
     return fig, ax
 

@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 TEACHING_VIEW = {
     "elev": 20,
-    "azim": -50,
+    "azim": -30,
     "proj_type": "persp",
     "focal_length": 0.65,
     "grid_alpha": 0.35,

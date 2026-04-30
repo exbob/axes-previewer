@@ -2,9 +2,21 @@
 import argparse
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+
+
+TEACHING_VIEW = {
+    "elev": 12,
+    "azim": 25,
+    "proj_type": "persp",
+    "focal_length": 0.65,
+    "grid_alpha": 0.35,
+    "box_aspect": (1, 1, 1),
+}
 
 
 def create_cartesian_figure(limit=10):
+    view = TEACHING_VIEW
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111, projection="3d")
 
@@ -15,8 +27,16 @@ def create_cartesian_figure(limit=10):
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
     ax.set_title("3D Cartesian Coordinate System")
-    ax.grid(True)
-    ax.set_box_aspect((1, 1, 1))
+    ax.grid(True, alpha=view["grid_alpha"])
+    ax.set_box_aspect(view["box_aspect"])
+    ax.xaxis.set_major_locator(MultipleLocator(2))
+    ax.yaxis.set_major_locator(MultipleLocator(2))
+    ax.zaxis.set_major_locator(MultipleLocator(2))
+    ax.view_init(elev=view["elev"], azim=view["azim"])
+    if view["proj_type"] == "persp":
+        ax.set_proj_type("persp", focal_length=view["focal_length"])
+    else:
+        ax.set_proj_type("ortho")
 
     ax.quiver(0, 0, 0, limit, 0, 0, color="r", linewidth=2, arrow_length_ratio=0.08)
     ax.quiver(0, 0, 0, 0, limit, 0, color="g", linewidth=2, arrow_length_ratio=0.08)

@@ -15,6 +15,16 @@ TEACHING_VIEW = {
 }
 
 
+def add_corner_reference_axes(ax, limit, length=2):
+    corner_origin = (-limit + 1.2, -limit + 1.2, -limit + 1.2)
+    ax.quiver(*corner_origin, length, 0, 0, color="k", linewidth=1.6, arrow_length_ratio=0.2)
+    ax.quiver(*corner_origin, 0, length, 0, color="k", linewidth=1.6, arrow_length_ratio=0.2)
+    ax.quiver(*corner_origin, 0, 0, length, color="k", linewidth=1.6, arrow_length_ratio=0.2)
+    ax.text(corner_origin[0] + length + 0.15, corner_origin[1], corner_origin[2], "E", color="k")
+    ax.text(corner_origin[0], corner_origin[1] + length + 0.15, corner_origin[2], "N", color="k")
+    ax.text(corner_origin[0], corner_origin[1], corner_origin[2] + length + 0.15, "U", color="k")
+
+
 def create_cartesian_figure(limit=10):
     view = TEACHING_VIEW
     fig = plt.figure(figsize=(8, 8))
@@ -50,6 +60,9 @@ def create_cartesian_figure(limit=10):
     ax.text(0, -label_offset, 0, "Back", color="0.35")
     ax.text(0, 0, label_offset, "Up", color="0.35")
     ax.text(0, 0, -label_offset, "Down", color="0.35")
+
+    # Mini orientation axes in the lower-left corner.
+    add_corner_reference_axes(ax, limit, length=2)
 
     return fig, ax
 

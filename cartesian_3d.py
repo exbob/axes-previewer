@@ -14,8 +14,8 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 @dataclass(frozen=True)
 class view_config_t:
-    elev: float = 20
-    azim: float = -30
+    elev: float = 30
+    azim: float = -20
     proj_type: str = "persp"
     focal_length: float = 0.65
     grid_alpha: float = 0.35
@@ -33,9 +33,9 @@ class corner_axes_config_t:
 
 @dataclass(frozen=True)
 class center_object_config_t:
-    cube_size: float = 4
+    cube_size: float = 6
     cube_color: str = "green"
-    cube_alpha: float = 0.28
+    cube_alpha: float = 0.20
     axis_length: float = 7
     axis_colors: tuple = ("r", "y", "b")
     axis_labels: tuple = ("X", "Y", "Z")

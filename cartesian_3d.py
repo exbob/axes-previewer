@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from pathlib import Path
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -351,10 +352,35 @@ def create_cartesian_figure(
 def main():
     parser = argparse.ArgumentParser(description="Draw a 3D Cartesian coordinate system.")
     parser.add_argument("--limit", type=float, default=10, help="Axis range limit.")
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Output file path. Supports .png or .svg; if omitted, show interactive window.",
+    )
+    parser.add_argument(
+        "--dpi",
+        type=int,
+        default=100,
+        help="PNG export DPI (default: 100). Only used when --output is .png.",
+    )
     args = parser.parse_args()
+    if args.dpi <= 0:
+        parser.error("--dpi must be a positive integer")
 
-    create_cartesian_figure(limit=args.limit)
-    plt.show()
+    fig, _ = create_cartesian_figure(limit=args.limit)
+    if args.output:
+        output_path = Path(args.output)
+        output_ext = output_path.suffix.lower()
+        if output_ext not in {".png", ".svg"}:
+            parser.error("--output only supports .png or .svg file extension")
+        if output_ext == ".png":
+            fig.savefig(output_path, format="png", dpi=args.dpi, bbox_inches="tight")
+        else:
+            fig.savefig(output_path, format="svg", bbox_inches="tight")
+        plt.close(fig)
+    else:
+        plt.show()
 
 
 if __name__ == "__main__":

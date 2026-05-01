@@ -37,11 +37,19 @@ python3 cartesian_3d.py
 参数说明：
 
 - `--limit`：坐标轴范围上限（浮点数），默认值 `10`
+- `--output`：导出图片文件路径，支持 `.png` 或 `.svg`；传该参数时不会弹出交互窗口
+- `--dpi`：导出 PNG 的分辨率（整数，默认 `100`）；仅在 `--output` 为 `.png` 时生效
 
 示例：
 
 ```bash
 python3 cartesian_3d.py --limit 12
+```
+
+```bash
+python3 cartesian_3d.py --output preview.png
+python3 cartesian_3d.py --output preview.png --dpi 300
+python3 cartesian_3d.py --limit 12 --output preview.svg
 ```
 
 ## 开发说明

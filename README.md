@@ -25,7 +25,7 @@ source .venv/bin/activate
 安装依赖：
 
 ```bash
-pip install matplotlib
+python3 -m pip install -r requirements.txt
 ```
 
 ### 运行命令

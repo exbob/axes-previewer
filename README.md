@@ -7,13 +7,12 @@
 运行后会显示三维场景，包含以下效果：
 
 - 带网格与刻度的三维坐标空间
-- 原点处的半透明立方体
 - 中心主轴（`X/Y/Z`）
 - 角落参考轴（默认 `E/N/U`）
+- 原点处的半透明立方体
+- 立方体面文字（可配置文字内容、显示的面和沿轴方向）
 
 ## 使用方法
-
-### 依赖安装
 
 建议先创建并启用虚拟环境：
 
@@ -28,15 +27,13 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-### 运行命令
-
 在项目根目录执行：
 
 ```bash
 python3 cartesian_3d.py
 ```
 
-### 参数说明
+参数说明：
 
 - `--limit`：坐标轴范围上限（浮点数），默认值 `10`
 
@@ -63,4 +60,39 @@ class center_object_config_t:
 
 ```python
 axis_labels: tuple = ("Y", "X", "Z")
+```
+
+### 如何修改立方体面的文字
+
+在 `cartesian_3d.py` 中，`center_object_config_t` 提供了贴在立方体表面的文字配置：
+
+```python
+@dataclass(frozen=True)
+class center_object_config_t:
+    # ...
+    face_text: str = "sensor"      # 文字内容
+    face_name: str = "up"          # 显示面: up/down/front/back/left/right
+    face_text_axis: str = "x"      # 文字沿面内哪个轴方向显示，支持 x/y/z 与 -x/-y/-z
+    face_text_color: str = "k"     # 文字颜色
+    face_text_size: float = 0.9    # 文字大小
+```
+
+`face_text_axis` 必须是当前 `face_name` 所在平面内的轴，不能使用该面的法向轴。合法组合如下：
+
+- `face_name = "up"` 或 `"down"`：`face_text_axis` 只能是 `x/-x/y/-y`（不能是 `z/-z`）
+- `face_name = "front"` 或 `"back"`：`face_text_axis` 只能是 `x/-x/z/-z`（不能是 `y/-y`）
+- `face_name = "left"` 或 `"right"`：`face_text_axis` 只能是 `y/-y/z/-z`（不能是 `x/-x`）
+
+示例：把文字改为 `camera`，显示在 `front` 面，并沿 `z` 轴方向排布：
+
+```python
+face_text: str = "camera"
+face_name: str = "front"
+face_text_axis: str = "z"
+```
+
+如果要验证沿 X 轴负方向显示，可改为：
+
+```python
+face_text_axis: str = "-x"
 ```

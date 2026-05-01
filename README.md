@@ -11,6 +11,7 @@
 - 角落参考轴（默认 `E/N/U`）
 - 原点处的半透明立方体
 - 立方体面文字（可配置文字内容、显示的面和沿轴方向）
+- 立方体面黑色圆点（可配置显示面和角位，贴在表面）
 
 ## 使用方法
 
@@ -96,3 +97,23 @@ face_text_axis: str = "z"
 ```python
 face_text_axis: str = "-x"
 ```
+
+### 如何配置立方体面的黑色圆点
+
+在 `center_object_config_t` 中使用以下字段控制黑色圆点：
+
+```python
+@dataclass(frozen=True)
+class center_object_config_t:
+    # ...
+    face_dot_enabled: bool = True        # 是否显示圆点
+    face_dot_name: str = "up"            # 显示面: up/down/front/back/left/right
+    face_dot_corner: str = "left_top"    # 角位: left_top/left_bottom/right_top/right_bottom
+    face_dot_radius: float = 0.12        # 圆点半径
+    face_dot_edge_offset: float = 0.5    # 距离所选角两条边的固定距离
+```
+
+说明：
+
+- `face_dot_corner` 目前只支持英文值：`left_top`、`left_bottom`、`right_top`、`right_bottom`
+- `face_dot_edge_offset` 默认 `0.5`，表示圆点到所选角两条边的距离都为 `0.5`

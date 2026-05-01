@@ -3,7 +3,7 @@ import argparse
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import PathPatch
+from matplotlib.patches import Circle, PathPatch
 from matplotlib.ticker import MultipleLocator
 from matplotlib.textpath import TextPath
 from matplotlib.transforms import Affine2D
@@ -46,6 +46,11 @@ class center_object_config_t:
     face_text_axis: str = "x"
     face_text_color: str = "k"
     face_text_size: float = 0.8
+    face_dot_enabled: bool = True
+    face_dot_name: str = "up"
+    face_dot_corner: str = "left_top"
+    face_dot_radius: float = 0.12
+    face_dot_edge_offset: float = 0.5
 
 
 DEFAULT_VIEW = view_config_t()
@@ -181,6 +186,15 @@ def add_center_cube_with_axes(ax, config):
         color=config.face_text_color,
         size=config.face_text_size,
     )
+    if config.face_dot_enabled:
+        add_dot_on_cube_face(
+            ax=ax,
+            cube_half=half,
+            face=config.face_dot_name,
+            corner=config.face_dot_corner,
+            edge_offset=config.face_dot_edge_offset,
+            radius=config.face_dot_radius,
+        )
 
     ax.quiver(0, 0, 0, config.axis_length, 0, 0, color=config.axis_colors[0], linewidth=2, arrow_length_ratio=0.08)
     ax.quiver(0, 0, 0, 0, config.axis_length, 0, color=config.axis_colors[1], linewidth=2, arrow_length_ratio=0.08)
@@ -276,6 +290,42 @@ def add_text_on_cube_face(ax, cube_half, text, face, axis, color="k", size=0.9):
     )
     ax.add_patch(text_patch)
     art3d.pathpatch_2d_to_3d(text_patch, z=z_value, zdir=zdir)
+
+
+def add_dot_on_cube_face(ax, cube_half, face, corner, edge_offset=0.5, radius=0.12):
+    """Add a black dot on a cube face at a corner-offset position."""
+    face_plane = {
+        "up": ("z", cube_half + 0.001),
+        "down": ("z", -cube_half - 0.001),
+        "front": ("y", cube_half + 0.001),
+        "back": ("y", -cube_half - 0.001),
+        "right": ("x", cube_half + 0.001),
+        "left": ("x", -cube_half - 0.001),
+    }
+    corner_aliases = {
+        "left_top": "left_top",
+        "left_bottom": "left_bottom",
+        "right_top": "right_top",
+        "right_bottom": "right_bottom",
+    }
+    corner_to_xy = {
+        "left_top": (-cube_half + edge_offset, cube_half - edge_offset),
+        "left_bottom": (-cube_half + edge_offset, -cube_half + edge_offset),
+        "right_top": (cube_half - edge_offset, cube_half - edge_offset),
+        "right_bottom": (cube_half - edge_offset, -cube_half + edge_offset),
+    }
+    if face not in face_plane:
+        raise ValueError(f"Unsupported face: {face}")
+    if corner not in corner_aliases:
+        raise ValueError(f"Unsupported corner: {corner}")
+    if not (0 <= edge_offset <= cube_half):
+        raise ValueError("edge_offset must satisfy 0 <= edge_offset <= cube_half")
+
+    dot_x, dot_y = corner_to_xy[corner_aliases[corner]]
+    dot_patch = Circle((dot_x, dot_y), radius=radius, facecolor="k", edgecolor="none", alpha=1.0)
+    ax.add_patch(dot_patch)
+    zdir, z_value = face_plane[face]
+    art3d.pathpatch_2d_to_3d(dot_patch, z=z_value, zdir=zdir)
 
 
 def create_cartesian_figure(

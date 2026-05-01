@@ -39,6 +39,7 @@ class center_object_config_t:
     axis_length: float = 7
     axis_colors: tuple = ("r", "y", "b")
     axis_labels: tuple = ("X", "Y", "Z")
+    axis_directions: tuple = ("right", "front", "up")
     axis_label_size: float = 16
     axis_label_weight: str = "bold"
     axis_label_offset: float = 0.2
@@ -57,6 +58,51 @@ class center_object_config_t:
 DEFAULT_VIEW = view_config_t()
 DEFAULT_CORNER_AXES = corner_axes_config_t()
 DEFAULT_CENTER_OBJECT = center_object_config_t()
+
+
+_DIRECTION_TO_VECTOR = {
+    "right": (1, 0, 0),
+    "left": (-1, 0, 0),
+    "front": (0, 1, 0),
+    "back": (0, -1, 0),
+    "up": (0, 0, 1),
+    "down": (0, 0, -1),
+}
+
+
+def _dot_product(a, b):
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+
+def _cross_product(a, b):
+    return (
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    )
+
+
+def _validate_and_get_axis_vectors(axis_directions):
+    if len(axis_directions) != 3:
+        raise ValueError("axis_directions must contain exactly 3 directions for X/Y/Z")
+    if len(set(axis_directions)) != 3:
+        raise ValueError("axis_directions for X/Y/Z must be unique")
+
+    vectors = []
+    for direction in axis_directions:
+        if direction not in _DIRECTION_TO_VECTOR:
+            raise ValueError(
+                "Unsupported axis direction: "
+                f"{direction}. Must be one of {tuple(_DIRECTION_TO_VECTOR.keys())}"
+            )
+        vectors.append(_DIRECTION_TO_VECTOR[direction])
+
+    x_vec, y_vec, z_vec = vectors
+    if _dot_product(_cross_product(x_vec, y_vec), z_vec) != 1:
+        raise ValueError(
+            "axis_directions must form a right-handed coordinate system (X x Y = Z)"
+        )
+    return vectors
 
 
 def setup_base_cartesian_scene(ax, limit, view):
@@ -197,36 +243,32 @@ def add_center_cube_with_axes(ax, config):
             radius=config.face_dot_radius,
         )
 
-    ax.quiver(0, 0, 0, config.axis_length, 0, 0, color=config.axis_colors[0], linewidth=2, arrow_length_ratio=0.08)
-    ax.quiver(0, 0, 0, 0, config.axis_length, 0, color=config.axis_colors[1], linewidth=2, arrow_length_ratio=0.08)
-    ax.quiver(0, 0, 0, 0, 0, config.axis_length, color=config.axis_colors[2], linewidth=2, arrow_length_ratio=0.08)
-    ax.text(
-        config.axis_length + config.axis_label_offset,
-        0,
-        0,
-        config.axis_labels[0],
-        color=config.axis_colors[0],
-        fontsize=config.axis_label_size,
-        fontweight=config.axis_label_weight,
-    )
-    ax.text(
-        0,
-        config.axis_length + config.axis_label_offset,
-        0,
-        config.axis_labels[1],
-        color=config.axis_colors[1],
-        fontsize=config.axis_label_size,
-        fontweight=config.axis_label_weight,
-    )
-    ax.text(
-        0,
-        0,
-        config.axis_length + config.axis_label_offset,
-        config.axis_labels[2],
-        color=config.axis_colors[2],
-        fontsize=config.axis_label_size,
-        fontweight=config.axis_label_weight,
-    )
+    axis_vectors = _validate_and_get_axis_vectors(config.axis_directions)
+    for index, vector in enumerate(axis_vectors):
+        dx = vector[0] * config.axis_length
+        dy = vector[1] * config.axis_length
+        dz = vector[2] * config.axis_length
+        ax.quiver(
+            0,
+            0,
+            0,
+            dx,
+            dy,
+            dz,
+            color=config.axis_colors[index],
+            linewidth=2,
+            arrow_length_ratio=0.08,
+        )
+        label_scale = config.axis_length + config.axis_label_offset
+        ax.text(
+            vector[0] * label_scale,
+            vector[1] * label_scale,
+            vector[2] * label_scale,
+            config.axis_labels[index],
+            color=config.axis_colors[index],
+            fontsize=config.axis_label_size,
+            fontweight=config.axis_label_weight,
+        )
 
 
 def add_text_on_cube_face(ax, cube_half, text, face, axis, color="k", size=0.9):

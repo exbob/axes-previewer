@@ -2,16 +2,27 @@
 
 ## 项目介绍
 
-这是一个用于预览 3D 笛卡尔坐标系的 Python 小工具，适合用于坐标系方向展示、教学演示和视觉化验证。
+这是一个 Python 小工具，用于预览 ENU 参考坐标系（East-North-Up）中，符合右手定则的物体的坐标轴方向，适合用于坐标系方向展示、教学演示和视觉化验证。
+
+参考坐标系中，空间方位与 ENU 方向的对应关系：
+
+| 方位 | 方向 |
+|---|---|
+| 前 (Front) | 北 (North) |
+| 后 (Back)  | 南 (South) |
+| 右 (Right) | 东 (East)  |
+| 左 (Left)  | 西 (West)  |
+| 上 (Up)    | 天 (Zenith/Up)  |
+| 下 (Down)  | 地 (Nadir/Down) |
 
 运行后会显示三维场景，包含以下效果：
 
 - 带网格与刻度的三维坐标空间
-- 中心主轴（`X/Y/Z`）
-- 角落参考轴（默认 `E/N/U`）
-- 原点处的半透明立方体
-- 立方体面文字（可配置文字内容、显示的面和沿轴方向）
-- 立方体面黑色圆点（可配置显示面和角位，贴在表面）
+- 背景空间方位标注：`up/down/front/back/left/right`
+- 角落有 ENU 坐标系的参考轴（`E/N/U`）
+- 原点处的半透明立方体，带有 `X/Y/Z` 三个坐标轴指向，符合右手坐标系。
+- 立方体面文字，用于标识物体名称（可配置文字内容、显示面、沿轴方向）
+- 立方体面黑色圆点，用于标识芯片的 Pin1 引脚位置（可配置显示面和角位，贴在表面）
 
 ## 使用方法
 
@@ -54,24 +65,35 @@ python3 cartesian_3d.py --limit 12 --output preview.svg
 
 ## 开发说明
 
-### 如何修改中间立方体的坐标轴标识
+### 如何修改中间立方体三轴箭头指向（保持右手系）
 
-在 `cartesian_3d.py` 中找到 `center_object_config_t`，修改 `axis_labels` 字段即可：
+在 `center_object_config_t` 中使用 `axis_directions` 配置 `X/Y/Z` 三个箭头指向，支持：
 
-```python
-@dataclass(frozen=True)
-class center_object_config_t:
-    # ...
-    axis_labels: tuple = ("X", "Y", "Z")
-```
+- `right/left`
+- `front/back`
+- `up/down`
 
-通常只需要调整 `X/Y/Z` 的顺序，例如改为 `Y/X/Z`：
+默认值：
 
 ```python
-axis_labels: tuple = ("Y", "X", "Z")
+axis_directions: tuple = ("right", "front", "up")
 ```
+
+例如你提到的映射：
+
+```python
+axis_directions: tuple = ("left", "front", "down")
+```
+
+该映射满足右手系（`X × Y = Z`），因此是合法的。程序会自动校验：
+
+- 必须恰好提供 3 个方向（对应 `X/Y/Z`）
+- 三个方向不能重复
+- 必须构成右手坐标系，否则抛出错误
 
 ### 如何修改立方体面的文字
+
+这个文字用于标识物体的名称和正面的位置。
 
 在 `cartesian_3d.py` 中，`center_object_config_t` 提供了贴在立方体表面的文字配置：
 
@@ -79,11 +101,11 @@ axis_labels: tuple = ("Y", "X", "Z")
 @dataclass(frozen=True)
 class center_object_config_t:
     # ...
-    face_text: str = "sensor"      # 文字内容
+    face_text: str = "Sensor"      # 文字内容
     face_name: str = "up"          # 显示面: up/down/front/back/left/right
     face_text_axis: str = "x"      # 文字沿面内哪个轴方向显示，支持 x/y/z 与 -x/-y/-z
     face_text_color: str = "k"     # 文字颜色
-    face_text_size: float = 0.9    # 文字大小
+    face_text_size: float = 0.8    # 文字大小
 ```
 
 `face_text_axis` 必须是当前 `face_name` 所在平面内的轴，不能使用该面的法向轴。合法组合如下：
@@ -108,7 +130,7 @@ face_text_axis: str = "-x"
 
 ### 如何配置立方体面的黑色圆点
 
-在 `center_object_config_t` 中使用以下字段控制黑色圆点：
+如果立方体是一个芯片，这个圆点用于标识芯片的 Pin1 引脚位置。在 `center_object_config_t` 中使用以下字段控制黑色圆点：
 
 ```python
 @dataclass(frozen=True)

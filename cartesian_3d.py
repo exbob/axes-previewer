@@ -83,6 +83,21 @@ def _cross_product(a, b):
 
 
 def _validate_and_get_axis_vectors(axis_directions):
+    """
+    Validate X/Y/Z axis direction mapping and return unit vectors.
+
+    Args:
+        axis_directions: A 3-item tuple for X/Y/Z axis directions.
+            Supported values are
+            {"right", "left", "front", "back", "up", "down"}.
+
+    Returns:
+        A list of 3 tuples, each being a Cartesian unit vector.
+
+    Raises:
+        ValueError: If direction count is not 3, values are duplicated/unsupported,
+            or the mapping does not satisfy right-handed rule (X x Y = Z).
+    """
     if len(axis_directions) != 3:
         raise ValueError("axis_directions must contain exactly 3 directions for X/Y/Z")
     if len(set(axis_directions)) != 3:
@@ -106,6 +121,14 @@ def _validate_and_get_axis_vectors(axis_directions):
 
 
 def setup_base_cartesian_scene(ax, limit, view):
+    """
+    Configure base 3D scene with limits, labels, ticks, and camera.
+
+    Args:
+        ax: Target 3D axis.
+        limit: Axis range limit in all three dimensions.
+        view: View configuration object controlling projection and camera.
+    """
     ax.set_xlim(-limit, limit)
     ax.set_ylim(-limit, limit)
     ax.set_zlim(-limit, limit)
@@ -126,6 +149,13 @@ def setup_base_cartesian_scene(ax, limit, view):
 
 
 def draw_background_axes(ax, limit):
+    """
+    Draw dashed global XYZ axes and six-direction background labels.
+
+    Args:
+        ax: Target 3D axis.
+        limit: Axis range limit used for line and label placement.
+    """
     ax.plot([-limit, limit], [0, 0], [0, 0], color="0.35", linestyle="--", linewidth=1.4)
     ax.plot([0, 0], [-limit, limit], [0, 0], color="0.35", linestyle="--", linewidth=1.4)
     ax.plot([0, 0], [0, 0], [-limit, limit], color="0.35", linestyle="--", linewidth=1.4)
@@ -140,6 +170,14 @@ def draw_background_axes(ax, limit):
 
 
 def add_corner_reference_axes(ax, limit, config):
+    """
+    Draw reference axes (default ENU labels) at the negative corner.
+
+    Args:
+        ax: Target 3D axis.
+        limit: Axis range limit used to compute corner origin.
+        config: Corner reference-axis drawing configuration.
+    """
     corner_origin = (
         -limit + config.padding,
         -limit + config.padding,
@@ -196,7 +234,23 @@ def add_corner_reference_axes(ax, limit, config):
 
 
 def add_center_cube_with_axes(ax, config):
-    """Draw the center cube, its XYZ axes, and optional face text."""
+    """
+    Draw center cube, object XYZ axes, and optional face markers.
+
+    This function renders:
+        1) Semi-transparent cube at origin
+        2) Face text marker (object name/front direction)
+        3) Optional face dot marker (e.g., chip Pin1)
+        4) Object XYZ axes based on configured direction mapping
+
+    Args:
+        ax: Target 3D axis.
+        config: Center object configuration including cube style, axis labels/colors,
+            axis direction mapping, face text, and face dot options.
+
+    Raises:
+        ValueError: Propagated from axis direction and face marker validation.
+    """
     half = config.cube_size / 2
     vertices = [
         (-half, -half, -half),
@@ -377,6 +431,18 @@ def create_cartesian_figure(
     corner_axes_config=DEFAULT_CORNER_AXES,
     center_object_config=DEFAULT_CENTER_OBJECT,
 ):
+    """
+    Build the full Cartesian preview figure and return figure handles.
+
+    Args:
+        limit: Axis range limit in world coordinates.
+        view: Scene/camera configuration.
+        corner_axes_config: Reference corner-axis configuration.
+        center_object_config: Center cube and primary-axis configuration.
+
+    Returns:
+        A tuple (fig, ax) where fig is matplotlib Figure and ax is 3D axis.
+    """
     # Create the figure and 3D axis, then set up the base scene and background axes
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111, projection="3d")
@@ -392,6 +458,12 @@ def create_cartesian_figure(
 
 
 def main():
+    """
+    Parse CLI arguments, render figure, and show or export image.
+
+    Raises:
+        SystemExit: Raised by argparse on invalid CLI arguments.
+    """
     parser = argparse.ArgumentParser(description="Draw a 3D Cartesian coordinate system.")
     parser.add_argument("--limit", type=float, default=10, help="Axis range limit.")
     parser.add_argument(

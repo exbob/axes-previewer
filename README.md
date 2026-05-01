@@ -65,6 +65,61 @@ python3 cartesian_3d.py --limit 12 --output preview.svg
 
 ## 开发说明
 
+### 软件模块划分
+
+这个软件可以分为 3 个核心部分：
+
+1. **3D 空间网格与背景方位轴**  
+   用于提供整体空间参照，包括网格、刻度和六个方位背景坐标轴（`up/down/front/back/left/right`）。
+2. **角落 ENU 参考坐标轴（负方向角）**  
+   用于显示 ENU（`E/N/U`）参考方向，默认放置在坐标系负方向角，帮助对照空间方位与工程坐标语义。
+3. **中间立方体对象**  
+   作为被标识物体，包含多个可自定义属性：
+   - 立方体面文字：用于标识物体名称和正面方向；
+   - 立方体面圆点：用于标识芯片 `Pin1` 引脚位置；
+   - 立方体坐标轴：用于标识物体 `X/Y/Z` 轴指向（支持右手系约束校验）。
+
+### 对应配置结构
+
+上述 3 个部分分别由以下配置数据结构驱动（均为 `@dataclass(frozen=True)`）：
+
+- `view_config_t`：控制 3D 空间网格与视角（网格透明度、投影、相机角度等）。
+- `corner_axes_config_t`：控制角落 ENU 参考坐标轴（长度、偏移、标签等）。
+- `center_object_config_t`：控制中间立方体及其可自定义属性（面文字、圆点、`X/Y/Z` 轴方向等）。
+
+其中，`center_object_config_t.axis_directions` 会通过 `_validate_and_get_axis_vectors()` 校验是否满足右手坐标系（`X × Y = Z`）。
+
+### 运行逻辑
+
+整体调用顺序如下：
+
+1. `main()` 解析参数（`--limit`、`--output`、`--dpi`）。
+2. `main()` 调用 `create_cartesian_figure()` 创建绘图对象。
+3. `create_cartesian_figure()` 依次绘制：
+   - 3D 空间网格与背景方位轴；
+   - 角落 ENU 参考坐标轴；
+   - 中间立方体（含面文字、圆点和 `X/Y/Z` 轴）。
+4. 若指定 `--output` 则导出图片，否则调用 `plt.show()` 交互显示。
+
+对应流程图：
+
+```mermaid
+flowchart TD
+	A[main() 启动] --> B[解析参数]
+	B --> C[create_cartesian_figure()]
+	C --> D[绘制3D空间网格与六方位背景轴]
+	D --> E[绘制右下角ENU参考坐标轴]
+	E --> F[绘制中间立方体]
+	F --> G[绘制面文字]
+	F --> H[绘制Pin1圆点]
+	F --> I[校验并绘制X/Y/Z轴方向]
+	I --> J{通过右手系校验?}
+	J -- 否 --> K[抛出 ValueError]
+	J -- 是 --> L{是否指定 --output?}
+	L -- 是 --> M[导出 .png/.svg]
+	L -- 否 --> N[plt.show() 交互显示]
+```
+
 ### 如何修改中间立方体三轴箭头指向（保持右手系）
 
 在 `center_object_config_t` 中使用 `axis_directions` 配置 `X/Y/Z` 三个箭头指向，支持：

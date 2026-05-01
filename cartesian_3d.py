@@ -475,8 +475,8 @@ def main():
     parser.add_argument(
         "--dpi",
         type=int,
-        default=100,
-        help="PNG export DPI (default: 100). Only used when --output is .png.",
+        default=300,
+        help="PNG export DPI (default: 300). Only used when --output is .png.",
     )
     args = parser.parse_args()
     if args.dpi <= 0:

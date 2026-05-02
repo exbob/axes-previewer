@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+      - "V*"
   # Actions → 本 workflow → Run workflow（可选分支），仅构建并上传 artifact，不创建 Release
   workflow_dispatch:
 

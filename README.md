@@ -24,22 +24,11 @@
 - 立方体面文字，用于标识物体名称（可配置文字内容、显示面、沿轴方向）
 - 立方体面黑色圆点，用于标识芯片的 Pin1 引脚位置（可配置显示面和角位，贴在表面）
 
-## 仓库布局
-
-```
-axes-previewer/
-├── README.md
-├── .gitignore
-└── scripts/
-    ├── cartesian_3d.py       # 命令行入口与非交互导出；3D 绘图与配置（dataclass 等）
-    ├── cartesian_3d_gui.py   # 交互式 GUI（Tkinter + Matplotlib）
-    ├── gui_app_version.py   # 版本号：优先 app_version.txt，其次 git describe
-    └── requirements.txt    # Python 依赖（matplotlib）
-```
-
 ## 使用方法
 
-以下均在 `scripts/` 目录创建虚拟环境并安装依赖（工作目录与脚本、依赖清单同级，路径更直观）：
+可以直接下载 Release 中预编译的可执行文件，在 Windows 下运行。
+
+也可以在Linux下，用 Python 执行。以下均在 `scripts/` 目录创建虚拟环境并安装依赖（工作目录与脚本、依赖清单同级，路径更直观）：
 
 ```bash
 cd scripts
@@ -84,11 +73,22 @@ python3 cartesian_3d_gui.py
 
 ## 开发说明
 
-软件核心在 `cartesian_3d.py`。
+### 仓库布局
+
+```
+axes-previewer/
+├── README.md
+├── .gitignore
+└── scripts/
+    ├── cartesian_3d.py       # 命令行入口与非交互导出；3D 绘图与配置（dataclass 等）
+    ├── cartesian_3d_gui.py   # 交互式 GUI（Tkinter + Matplotlib）
+    ├── gui_app_version.py   # 版本号：优先 app_version.txt，其次 git describe
+    └── requirements.txt    # Python 依赖（matplotlib）
+```
 
 ### 软件模块划分
 
-这个软件可以分为 3 个核心部分：
+软件核心在 `cartesian_3d.py`，这个软件可以分为 3 个核心部分：
 
 1. **3D 空间网格与背景方位轴**  
    用于提供整体空间参照，包括网格、刻度和六个方位背景坐标轴（`up/down/front/back/left/right`）。

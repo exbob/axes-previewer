@@ -24,26 +24,30 @@
 - 立方体面文字，用于标识物体名称（可配置文字内容、显示面、沿轴方向）
 - 立方体面黑色圆点，用于标识芯片的 Pin1 引脚位置（可配置显示面和角位，贴在表面）
 
+## 仓库布局
+
+```
+axes-previewer/
+├── README.md
+├── .gitignore
+└── scripts/
+    ├── cartesian_3d.py     # 程序入口与配置（dataclass 等）
+    └── requirements.txt    # Python 依赖
+```
+
 ## 使用方法
 
-建议先创建并启用虚拟环境：
+在 `scripts/` 目录下创建虚拟环境、安装依赖并运行（工作目录与脚本、依赖清单同级，导出图片等相对路径也更直观）：
 
 ```bash
+cd scripts
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-安装依赖：
-
-```bash
 python3 -m pip install -r requirements.txt
-```
-
-在项目根目录执行：
-
-```bash
 python3 cartesian_3d.py
 ```
+
+之后每次使用：先 `cd scripts`，再 `source .venv/bin/activate`，然后执行 `python3 cartesian_3d.py` 及参数。
 
 参数说明：
 
@@ -51,7 +55,7 @@ python3 cartesian_3d.py
 - `--output`：导出图片文件路径，支持 `.png` 或 `.svg`；传该参数时不会弹出交互窗口
 - `--dpi`：导出 PNG 的分辨率（整数，默认 `300`）；仅在 `--output` 为 `.png` 时生效
 
-示例：
+示例（已在 `scripts/` 中并激活 `.venv`）：
 
 ```bash
 python3 cartesian_3d.py --limit 12
@@ -108,7 +112,7 @@ flowchart TD
 	A[main() 启动] --> B[解析参数]
 	B --> C[create_cartesian_figure()]
 	C --> D[绘制3D空间网格与六方位背景轴]
-	D --> E[绘制右下角ENU参考坐标轴]
+	D --> E[绘制角落的ENU参考坐标轴]
 	E --> F[绘制中间立方体]
 	F --> G[绘制面文字]
 	F --> H[绘制Pin1圆点]
@@ -150,7 +154,7 @@ axis_directions: tuple = ("left", "front", "down")
 
 这个文字用于标识物体的名称和正面的位置。
 
-在 `cartesian_3d.py` 中，`center_object_config_t` 提供了贴在立方体表面的文字配置：
+在 `center_object_config_t` 中修改文字配置：
 
 ```python
 @dataclass(frozen=True)
@@ -185,7 +189,9 @@ face_text_axis: str = "-x"
 
 ### 如何配置立方体面的黑色圆点
 
-如果立方体是一个芯片，这个圆点用于标识芯片的 Pin1 引脚位置。在 `center_object_config_t` 中使用以下字段控制黑色圆点：
+如果立方体是一个芯片，这个圆点用于标识芯片的 Pin1 引脚位置。
+
+在 `center_object_config_t` 中使用以下字段控制黑色圆点：
 
 ```python
 @dataclass(frozen=True)

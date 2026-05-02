@@ -24,6 +24,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
 import cartesian_3d as c3d  # noqa: E402
+from gui_app_version import get_app_version  # noqa: E402
 
 # Same keys as cartesian_3d axis direction vocabulary (for combobox values).
 _DIRECTION_CHOICES = ("back", "down", "front", "left", "right", "up")
@@ -41,6 +42,8 @@ _FIG_DPI_MAX = 192
 
 # Interactive figure size (inches); primary driver of default window size.
 _DEFAULT_FIGSIZE_INCHES = (12.0, 12.0)
+
+_APP_VERSION = get_app_version(_SCRIPTS_DIR)
 
 
 def _pixels_per_inch(root: tk.Tk) -> float:
@@ -311,6 +314,17 @@ class Cartesian3DEditorApp:
         ttk.Button(btn_row, text="Export SVG...", command=self._export_svg).pack(
             fill=tk.X, pady=2
         )
+
+        ctrl.rowconfigure(row, weight=1)
+        row += 1
+        ver_lbl = ttk.Label(
+            ctrl,
+            text=f"{_APP_VERSION}",
+            wraplength=220,
+            justify=tk.CENTER,
+            anchor="center",
+        )
+        ver_lbl.grid(row=row, column=0, sticky="ew", pady=(8, 0))
 
         ctrl.columnconfigure(0, weight=1)
 

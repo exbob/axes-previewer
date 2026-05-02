@@ -41,7 +41,7 @@ _FIG_DPI_MIN = 96
 _FIG_DPI_MAX = 192
 
 # Interactive figure size (inches); primary driver of default window size.
-_DEFAULT_FIGSIZE_INCHES = (8.0, 8.0)
+_DEFAULT_FIGSIZE_INCHES = (7.0, 7.0)
 
 _APP_VERSION = get_app_version(_SCRIPTS_DIR)
 

@@ -59,9 +59,7 @@ python3 cartesian_3d.py
 
 ```bash
 python3 cartesian_3d.py --limit 12
-```
 
-```bash
 python3 cartesian_3d.py --output preview.png
 python3 cartesian_3d.py --output preview.png --dpi 300
 python3 cartesian_3d.py --limit 12 --output preview.svg

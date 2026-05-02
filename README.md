@@ -126,19 +126,19 @@ python3 cartesian_3d_gui.py
 
 ```mermaid
 flowchart TD
-	A[main() 启动] --> B[解析参数]
-	B --> C[create_cartesian_figure()]
-	C --> D[绘制3D空间网格与六方位背景轴]
-	D --> E[绘制角落的ENU参考坐标轴]
-	E --> F[绘制中间立方体]
-	F --> G[绘制面文字]
-	F --> H[绘制Pin1圆点]
-	F --> I[校验并绘制X/Y/Z轴方向]
-	I --> J{通过右手系校验?}
-	J -- 否 --> K[抛出 ValueError]
-	J -- 是 --> L{是否指定 --output?}
-	L -- 是 --> M[导出 .png/.svg]
-	L -- 否 --> N[plt.show() 交互显示]
+    A["main() 启动"] --> B["解析参数"]
+    B --> C["create_cartesian_figure()"]
+    C --> D["绘制 3D 空间网格与六方位背景轴"]
+    D --> E["绘制角落的 ENU 参考坐标轴"]
+    E --> F["绘制中间立方体"]
+    F --> G["绘制面文字"]
+    F --> H["绘制 Pin1 圆点"]
+    F --> I["校验并绘制 X/Y/Z 轴方向"]
+    I --> J{"通过右手系校验?"}
+    J -- 否 --> K["抛出 ValueError"]
+    J -- 是 --> L{"是否指定 --output?"}
+    L -- 是 --> M["导出 .png / .svg"]
+    L -- 否 --> N["plt.show() 交互显示"]
 ```
 
 ### 如何修改中间立方体三轴箭头指向（保持右手系）

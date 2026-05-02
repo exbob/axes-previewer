@@ -31,23 +31,30 @@ axes-previewer/
 ├── README.md
 ├── .gitignore
 └── scripts/
-    ├── cartesian_3d.py     # 程序入口与配置（dataclass 等）
-    └── requirements.txt    # Python 依赖
+    ├── cartesian_3d.py       # 命令行入口与非交互导出；3D 绘图与配置（dataclass 等）
+    ├── cartesian_3d_gui.py   # 交互式 GUI（Tkinter + Matplotlib）
+    ├── gui_app_version.py   # 版本号：优先 app_version.txt，其次 git describe
+    └── requirements.txt    # Python 依赖（matplotlib）
 ```
 
 ## 使用方法
 
-在 `scripts/` 目录下创建虚拟环境、安装依赖并运行（工作目录与脚本、依赖清单同级，导出图片等相对路径也更直观）：
+以下均在 `scripts/` 目录创建虚拟环境并安装依赖（工作目录与脚本、依赖清单同级，路径更直观）：
 
 ```bash
 cd scripts
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 python3 -m pip install -r requirements.txt
-python3 cartesian_3d.py
 ```
 
-之后每次使用：先 `cd scripts`，再 `source .venv/bin/activate`，然后执行 `python3 cartesian_3d.py` 及参数。
+之后每次使用：先 `cd scripts`，再激活 `.venv`，再运行下文对应的命令。
+
+### 命令行（`cartesian_3d.py`）
+
+```bash
+python3 cartesian_3d.py
+```
 
 参数说明：
 
@@ -65,7 +72,19 @@ python3 cartesian_3d.py --output preview.png --dpi 300
 python3 cartesian_3d.py --limit 12 --output preview.svg
 ```
 
+### 图形界面（`cartesian_3d_gui.py`）
+
+在已激活的 `.venv` 中：
+
+```bash
+python3 cartesian_3d_gui.py
+```
+
+界面右侧可编辑立方体面文字、面圆点、体轴与角落 ENU 标签，并导出 PNG/SVG。设置区域底部显示 **版本号**：开发时来自 `git describe --tags --always --long`（由 `gui_app_version.py` 解析）；单文件打包的 Windows 可执行文件内嵌 `app_version.txt`，运行时优先使用该文件。
+
 ## 开发说明
+
+软件核心在 `cartesian_3d.py`。
 
 ### 软件模块划分
 

@@ -2,6 +2,9 @@
 """
 Interactive 3D Cartesian preview: edit cube label, face dot, and axis mapping in a GUI,
 export PNG/SVG. Reuses cartesian_3d.py in this directory without modifying that module.
+
+Adapts Tk scaling and Matplotlib figure DPI from the display PPI so the UI stays usable
+on 4K / high-DPI monitors (Windows per-monitor DPI awareness is enabled before Tk starts).
 """
 from __future__ import annotations
 
@@ -27,6 +30,49 @@ _DIRECTION_CHOICES = ("back", "down", "front", "left", "right", "up")
 _FACE_CHOICES = ("up", "down", "front", "back", "left", "right")
 _CORNER_CHOICES = ("left_top", "left_bottom", "right_top", "right_bottom")
 _TEXT_AXIS_CHOICES = ("x", "-x", "y", "-y", "z", "-z")
+
+# HiDPI / 4K: Tk and Matplotlib default to ~96 PPI logic, which looks tiny on 4K.
+_REFERENCE_PPI = 96.0
+_FIG_DPI_MIN = 96
+_FIG_DPI_MAX = 192
+
+# Interactive figure size (inches); primary driver of default window size.
+_DEFAULT_FIGSIZE_INCHES = (12.0, 12.0)
+
+
+def _pixels_per_inch(root: tk.Tk) -> float:
+    """Physical pixels per inch for the root window's screen (fallback: 96)."""
+    try:
+        return float(root.winfo_fpixels("1i"))
+    except tk.TclError:
+        return _REFERENCE_PPI
+
+
+def _apply_tk_scaling_for_display(root: tk.Tk) -> float:
+    """
+    Match Tk point scaling to display DPI so ttk fonts and layout scale on 4K.
+
+    Returns measured PPI for reuse (e.g. Matplotlib figure DPI).
+    """
+    root.update_idletasks()
+    ppi = _pixels_per_inch(root)
+    try:
+        root.tk.call("tk", "scaling", "-displayof", ".", ppi / 72.0)
+    except tk.TclError:
+        pass
+    return ppi
+
+
+def _figure_dpi_for_display(ppi: float) -> int:
+    """Figure DPI scales with PPI; capped so the default window stays reasonable."""
+    scaled = int(round(100.0 * (ppi / _REFERENCE_PPI)))
+    return max(_FIG_DPI_MIN, min(_FIG_DPI_MAX, scaled))
+
+
+def _plot_column_minsize(ppi: float) -> int:
+    """Minimum width (px) for the plot column; grows slightly on high-DPI screens."""
+    base = 360
+    return max(base, min(860, int(float(base) * (ppi / _REFERENCE_PPI))))
 
 
 def _build_center_config_from_ui(state: dict) -> c3d.center_object_config_t:
@@ -69,17 +115,32 @@ class Cartesian3DEditorApp:
     def __init__(self) -> None:
         self.root = tk.Tk()
         self.root.title("3D Cartesian preview — editor")
+        self._ppi = _apply_tk_scaling_for_display(self.root)
         self.limit = 10.0
         self.view = c3d.DEFAULT_VIEW
 
-        self.fig = Figure(figsize=(7.5, 7.5), dpi=100)
+        fig_dpi = _figure_dpi_for_display(self._ppi)
+        self.fig = Figure(figsize=_DEFAULT_FIGSIZE_INCHES, dpi=fig_dpi)
         self.ax = self.fig.add_subplot(111, projection="3d")
         self.canvas = None  # created in _build_layout with correct parent
 
         self._vars = self._make_vars()
         self._build_layout()
+        self._center_root_window()
         self.root.update_idletasks()
         self._redraw()
+
+    def _center_root_window(self) -> None:
+        """Place the root window in the center of the primary screen on startup."""
+        root = self.root
+        root.update_idletasks()
+        req_w = root.winfo_reqwidth()
+        req_h = root.winfo_reqheight()
+        sw = root.winfo_screenwidth()
+        sh = root.winfo_screenheight()
+        x = max(0, (sw - req_w) // 2)
+        y = max(0, (sh - req_h) // 2)
+        root.geometry(f"+{x}+{y}")
 
     def _make_vars(self) -> dict:
         co = c3d.DEFAULT_CENTER_OBJECT
@@ -109,7 +170,7 @@ class Cartesian3DEditorApp:
         # zero width, which hides the 3D plot on the left.
         main = ttk.Frame(self.root)
         main.pack(fill=tk.BOTH, expand=True)
-        main.columnconfigure(0, weight=1, minsize=280)
+        main.columnconfigure(0, weight=1, minsize=_plot_column_minsize(self._ppi))
         main.columnconfigure(1, weight=0)
         main.rowconfigure(0, weight=1)
 
@@ -317,7 +378,25 @@ class Cartesian3DEditorApp:
         self.root.mainloop()
 
 
+def _windows_set_per_monitor_dpi_awareness() -> None:
+    """Improve PPI detection on 4K Windows; must run before tk.Tk()."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+    except ImportError:
+        return
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except (AttributeError, OSError):
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except (AttributeError, OSError):
+            pass
+
+
 def main() -> None:
+    _windows_set_per_monitor_dpi_awareness()
     Cartesian3DEditorApp().run()
 
 

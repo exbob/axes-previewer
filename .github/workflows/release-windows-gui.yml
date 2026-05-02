@@ -1,0 +1,71 @@
+name: Release Windows GUI
+
+on:
+  push:
+    tags:
+      - "v*"
+  # Actions → 本 workflow → Run workflow（可选分支），仅构建并上传 artifact，不创建 Release
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  windows-gui:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install matplotlib pyinstaller
+
+      - name: Write version file
+        shell: bash
+        run: git describe --tags --always --long > scripts/app_version.txt
+
+      # Use PowerShell here (not Git Bash): MSYS can mangle `--add-data src;dest`
+      # semicolons/paths and break PyInstaller on Windows runners.
+      - name: Build executable (PyInstaller)
+        working-directory: scripts
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onefile `
+            --name Cartesian3DEditor `
+            --hidden-import matplotlib.backends.backend_tkagg `
+            --hidden-import mpl_toolkits.mplot3d.art3d `
+            --add-data "app_version.txt;." `
+            cartesian_3d_gui.py
+
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          $exe = Join-Path $env:GITHUB_WORKSPACE "scripts/dist/Cartesian3DEditor.exe"
+          if (-not (Test-Path -LiteralPath $exe)) { throw "Missing $exe" }
+          Get-Item -LiteralPath $exe | Format-List Name, Length
+
+      - name: Upload workflow artifact (manual runs / backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cartesian3DEditor-windows
+          path: scripts/dist/Cartesian3DEditor.exe
+          if-no-files-found: error
+
+      - name: Upload to GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: scripts/dist/Cartesian3DEditor.exe
+          fail_on_unmatched_files: true
+          generate_release_notes: true

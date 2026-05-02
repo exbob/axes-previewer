@@ -31,6 +31,9 @@ _FACE_CHOICES = ("up", "down", "front", "back", "left", "right")
 _CORNER_CHOICES = ("left_top", "left_bottom", "right_top", "right_bottom")
 _TEXT_AXIS_CHOICES = ("x", "-x", "y", "-y", "z", "-z")
 
+# Gap between right-aligned labels and the following Entry/Combobox (px, left, right).
+_LABEL_PAD_AFTER = (0, 10)
+
 # HiDPI / 4K: Tk and Matplotlib default to ~96 PPI logic, which looks tiny on 4K.
 _REFERENCE_PPI = 96.0
 _FIG_DPI_MIN = 96
@@ -187,11 +190,13 @@ class Cartesian3DEditorApp:
         lf_cube = ttk.LabelFrame(ctrl, text="Cube face text", padding=6)
         lf_cube.grid(row=row, column=0, sticky="ew")
         row += 1
-        ttk.Label(lf_cube, text="Text").grid(row=0, column=0, sticky="w")
+        ttk.Label(lf_cube, text="Text").grid(row=0, column=0, sticky="e", padx=_LABEL_PAD_AFTER)
         ttk.Entry(lf_cube, textvariable=self._vars["face_text"], width=18).grid(
             row=0, column=1, sticky="ew"
         )
-        ttk.Label(lf_cube, text="Face").grid(row=1, column=0, sticky="w", pady=(4, 0))
+        ttk.Label(lf_cube, text="Face").grid(
+            row=1, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(4, 0)
+        )
         ttk.Combobox(
             lf_cube,
             textvariable=self._vars["face_name"],
@@ -199,7 +204,9 @@ class Cartesian3DEditorApp:
             state="readonly",
             width=16,
         ).grid(row=1, column=1, sticky="ew", pady=(4, 0))
-        ttk.Label(lf_cube, text="In-face axis").grid(row=2, column=0, sticky="w", pady=(4, 0))
+        ttk.Label(lf_cube, text="In-face axis").grid(
+            row=2, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(4, 0)
+        )
         ttk.Combobox(
             lf_cube,
             textvariable=self._vars["face_text_axis"],
@@ -215,7 +222,9 @@ class Cartesian3DEditorApp:
         ttk.Checkbutton(
             lf_dot, text="Show dot", variable=self._vars["face_dot_enabled"]
         ).grid(row=0, column=0, columnspan=2, sticky="w")
-        ttk.Label(lf_dot, text="Face").grid(row=1, column=0, sticky="w", pady=(4, 0))
+        ttk.Label(lf_dot, text="Face").grid(
+            row=1, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(4, 0)
+        )
         ttk.Combobox(
             lf_dot,
             textvariable=self._vars["face_dot_name"],
@@ -223,7 +232,9 @@ class Cartesian3DEditorApp:
             state="readonly",
             width=16,
         ).grid(row=1, column=1, sticky="ew", pady=(4, 0))
-        ttk.Label(lf_dot, text="Corner").grid(row=2, column=0, sticky="w", pady=(4, 0))
+        ttk.Label(lf_dot, text="Corner").grid(
+            row=2, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(4, 0)
+        )
         ttk.Combobox(
             lf_dot,
             textvariable=self._vars["face_dot_corner"],
@@ -231,11 +242,15 @@ class Cartesian3DEditorApp:
             state="readonly",
             width=16,
         ).grid(row=2, column=1, sticky="ew", pady=(4, 0))
-        ttk.Label(lf_dot, text="Radius").grid(row=3, column=0, sticky="w", pady=(4, 0))
+        ttk.Label(lf_dot, text="Radius").grid(
+            row=3, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(4, 0)
+        )
         ttk.Entry(lf_dot, textvariable=self._vars["face_dot_radius"], width=10).grid(
             row=3, column=1, sticky="w", pady=(4, 0)
         )
-        ttk.Label(lf_dot, text="Edge offset").grid(row=4, column=0, sticky="w", pady=(4, 0))
+        ttk.Label(lf_dot, text="Edge offset").grid(
+            row=4, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(4, 0)
+        )
         ttk.Entry(lf_dot, textvariable=self._vars["face_dot_edge_offset"], width=10).grid(
             row=4, column=1, sticky="w", pady=(4, 0)
         )
@@ -252,11 +267,15 @@ class Cartesian3DEditorApp:
             )
         ):
             r = i * 2
-            ttk.Label(lf_axes, text=f"{lbl} label").grid(row=r, column=0, sticky="w")
+            ttk.Label(lf_axes, text=f"{lbl} label").grid(
+                row=r, column=0, sticky="e", padx=_LABEL_PAD_AFTER
+            )
             ttk.Entry(lf_axes, textvariable=self._vars[key_l], width=8).grid(
                 row=r, column=1, sticky="w"
             )
-            ttk.Label(lf_axes, text="Direction").grid(row=r + 1, column=0, sticky="w", pady=(2, 0))
+            ttk.Label(lf_axes, text="Direction").grid(
+                row=r + 1, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(2, 0)
+            )
             ttk.Combobox(
                 lf_axes,
                 textvariable=self._vars[key_d],
@@ -272,7 +291,9 @@ class Cartesian3DEditorApp:
         for i, (lab, key) in enumerate(
             (("E", "corner_e"), ("N", "corner_n"), ("U", "corner_u"))
         ):
-            ttk.Label(lf_corner, text=lab).grid(row=i, column=0, sticky="w", pady=(2, 0))
+            ttk.Label(lf_corner, text=lab).grid(
+                row=i, column=0, sticky="e", padx=_LABEL_PAD_AFTER, pady=(2, 0)
+            )
             ttk.Entry(lf_corner, textvariable=self._vars[key], width=12).grid(
                 row=i, column=1, sticky="ew", pady=(2, 0)
             )

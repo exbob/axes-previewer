@@ -9,6 +9,7 @@ on 4K / high-DPI monitors (Windows per-monitor DPI awareness is enabled before T
 from __future__ import annotations
 
 import sys
+import webbrowser
 from dataclasses import replace
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -44,6 +45,7 @@ _FIG_DPI_MAX = 192
 _DEFAULT_FIGSIZE_INCHES = (7.0, 7.0)
 
 _APP_VERSION = get_app_version(_SCRIPTS_DIR)
+_APP_HOMEPAGE = "https://shaocheng.li/"
 
 
 def _pixels_per_inch(root: tk.Tk) -> float:
@@ -317,6 +319,17 @@ class Cartesian3DEditorApp:
 
         ctrl.rowconfigure(row, weight=1)
         row += 1
+        link_lbl = tk.Label(
+            ctrl,
+            text="shaocheng.li",
+            fg="#1a73e8",
+            cursor="hand2",
+            justify=tk.CENTER,
+            anchor="center",
+        )
+        link_lbl.bind("<Button-1>", self._open_homepage)
+        link_lbl.grid(row=row, column=0, sticky="ew", pady=(8, 0))
+        row += 1
         ver_lbl = ttk.Label(
             ctrl,
             text=f"{_APP_VERSION}",
@@ -352,6 +365,9 @@ class Cartesian3DEditorApp:
 
     def _on_apply(self) -> None:
         self._redraw()
+
+    def _open_homepage(self, _event: object | None = None) -> None:
+        webbrowser.open_new_tab(_APP_HOMEPAGE)
 
     def _export_png(self) -> None:
         path = filedialog.asksaveasfilename(

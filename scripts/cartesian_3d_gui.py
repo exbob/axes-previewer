@@ -126,6 +126,7 @@ class Cartesian3DEditorApp:
         self._ppi = _apply_tk_scaling_for_display(self.root)
         self.limit = 10.0
         self.view = c3d.DEFAULT_VIEW
+        self._scene_ready = False
 
         fig_dpi = _figure_dpi_for_display(self._ppi)
         self.fig = Figure(figsize=_DEFAULT_FIGSIZE_INCHES, dpi=fig_dpi)
@@ -344,6 +345,11 @@ class Cartesian3DEditorApp:
     def _collect_state(self) -> dict:
         return {k: v.get() for k, v in self._vars.items()}
 
+    def _sync_view_from_interactive_ax(self) -> None:
+        if not self._scene_ready:
+            return
+        self.view = c3d.view_config_from_3d_axes(self.ax, self.view)
+
     def _redraw(self) -> None:
         state = self._collect_state()
         try:
@@ -354,12 +360,14 @@ class Cartesian3DEditorApp:
             return
 
         try:
+            self._sync_view_from_interactive_ax()
             self.ax.clear()
             c3d.setup_base_cartesian_scene(self.ax, self.limit, self.view)
             c3d.draw_background_axes(self.ax, self.limit)
             c3d.add_corner_reference_axes(self.ax, self.limit, corner)
             c3d.add_center_cube_with_axes(self.ax, center)
             self.canvas.draw()
+            self._scene_ready = True
         except ValueError as exc:
             messagebox.showerror("Draw failed", str(exc))
 
@@ -384,6 +392,7 @@ class Cartesian3DEditorApp:
         except ValueError as exc:
             messagebox.showerror("Invalid input", str(exc))
             return
+        self._sync_view_from_interactive_ax()
         fig = Figure(figsize=(8, 8), dpi=300)
         ax = fig.add_subplot(111, projection="3d")
         try:
@@ -412,6 +421,7 @@ class Cartesian3DEditorApp:
         except ValueError as exc:
             messagebox.showerror("Invalid input", str(exc))
             return
+        self._sync_view_from_interactive_ax()
         fig = Figure(figsize=(8, 8))
         ax = fig.add_subplot(111, projection="3d")
         try:

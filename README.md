@@ -77,9 +77,19 @@ python3 cartesian_3d.py --limit 12 --output preview.svg
 python3 cartesian_3d_gui.py
 ```
 
-界面右侧可编辑立方体面文字、面圆点、体轴与角落 ENU 标签，并导出 PNG/SVG。设置区域底部显示 **版本号**：开发时来自 `git describe --tags --always --long`（由 `gui_app_version.py` 解析）；单文件打包的 Windows 可执行文件内嵌 `app_version.txt`，运行时优先使用该文件。
+界面右侧可编辑立方体面文字、面圆点、体轴与角落 ENU 标签，并导出 PNG/SVG。在左侧预览区用鼠标旋转后，**Apply / redraw** 与 **PNG/SVG 导出** 会使用当前预览的相机视角（首次成功绘制场景之后从轴上同步）。设置区域底部显示 **版本号**：开发时来自 `git describe --tags --always --long`（由 `gui_app_version.py` 解析）；单文件打包的 Windows 可执行文件内嵌 `app_version.txt`，运行时优先使用该文件。
 
 ## 开发说明
+
+在仓库根目录创建 `.venv` 并安装 `scripts/requirements-dev.txt`（含 `pytest`）后，可运行：
+
+```bash
+cd /path/to/axes-previewer
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r scripts/requirements-dev.txt
+python3 -m pytest tests/ -v
+```
 
 ### 仓库布局
 
@@ -87,11 +97,14 @@ python3 cartesian_3d_gui.py
 axes-previewer/
 ├── README.md
 ├── .gitignore
+├── tests/
+│   └── test_view_config_from_3d_axes.py
 └── scripts/
     ├── cartesian_3d.py       # 命令行入口与非交互导出；3D 绘图与配置（dataclass 等）
     ├── cartesian_3d_gui.py   # 交互式 GUI（Tkinter + Matplotlib）
     ├── gui_app_version.py   # 版本号：优先 app_version.txt，其次 git describe
-    └── requirements.txt    # Python 依赖（matplotlib）
+    ├── requirements.txt     # 运行时依赖（matplotlib）
+    └── requirements-dev.txt   # 开发依赖（pytest 等）
 ```
 
 ### 软件模块划分

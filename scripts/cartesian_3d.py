@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import argparse
+import math
+from dataclasses import dataclass, replace
 from pathlib import Path
-from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, PathPatch
@@ -118,6 +119,35 @@ def _validate_and_get_axis_vectors(axis_directions):
             "axis_directions must form a right-handed coordinate system (X x Y = Z)"
         )
     return vectors
+
+
+def view_config_from_3d_axes(ax, base: view_config_t) -> view_config_t:
+    """
+    Merge camera-related fields from a live Axes3D into a view_config_t.
+
+    Non-camera fields (grid_alpha, box_aspect, etc.) are taken from base.
+    If perspective focal length cannot be read from the axis, proj_type and
+    focal_length fall back to base.
+
+    Args:
+        ax: Matplotlib Axes3D instance.
+        base: Existing view configuration (provides defaults and non-camera fields).
+
+    Returns:
+        New view_config_t with elev/azim from ax and best-effort projection fields.
+    """
+    elev = float(ax.elev)
+    azim = float(ax.azim)
+    fl_attr = getattr(ax, "_focal_length", None)
+    if fl_attr is None:
+        return replace(base, elev=elev, azim=azim)
+    try:
+        fl_float = float(fl_attr)
+    except (TypeError, ValueError):
+        return replace(base, elev=elev, azim=azim)
+    if math.isinf(fl_float):
+        return replace(base, elev=elev, azim=azim, proj_type="ortho")
+    return replace(base, elev=elev, azim=azim, proj_type="persp", focal_length=fl_float)
 
 
 def setup_base_cartesian_scene(ax, limit, view):

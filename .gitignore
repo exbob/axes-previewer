@@ -1,6 +1,6 @@
 __pycache__
 .venv
-tests
+.pytest_cache
 scripts/app_version.txt
 scripts/build/
 scripts/dist/
